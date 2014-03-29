@@ -11,6 +11,12 @@
       </BindingProperties>
     </Component>
     <Component class="org.beastiebots.scouting.tournament.TeleopPerformance" name="teleopPerformance2">
+      <BindingProperties>
+        <BindingProperty name="doubleHang" source="checkBoxDoubleHang2" sourcePath="${selected}" target="teleopPerformance2" targetPath="doubleHang" updateStrategy="0" immediately="false"/>
+        <BindingProperty name="flag" source="checkBoxFlag2" sourcePath="${selected}" target="teleopPerformance2" targetPath="flag" updateStrategy="0" immediately="false"/>
+        <BindingProperty name="hang" source="checkBoxHang2" sourcePath="${selected}" target="teleopPerformance2" targetPath="hang" updateStrategy="0" immediately="false"/>
+        <BindingProperty name="numCubes" source="spinnerTeleopCubes2" sourcePath="${value}" target="teleopPerformance2" targetPath="numCubes" updateStrategy="0" immediately="false"/>
+      </BindingProperties>
     </Component>
   </NonVisualComponents>
   <Properties>
@@ -137,16 +143,18 @@
                   <Component id="fieldPanel2" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="spinnerAutoCube1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="spinnerAutoCube2" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel21" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="spinnerTeleopCubes1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Group type="103" alignment="3" groupAlignment="3" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                       <Component id="spinnerTeleopCubes2" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel24" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="spinnerAutoCube1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="spinnerAutoCube2" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel21" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="spinnerTeleopCubes1" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -461,6 +469,9 @@
           <SpinnerModel initial="0" maximum="4" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="spinnerAutoCube1StateChanged"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JSpinner" name="spinnerTeleopCubes1">
       <Properties>
@@ -500,6 +511,9 @@
           <SpinnerModel initial="0" maximum="4" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="spinnerAutoCube2StateChanged"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="checkBoxFlag2">
       <Properties>

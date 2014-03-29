@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.beastiebots.scouting.tournament;
 
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import org.beastiebots.utilities.Timestamped;
 
@@ -15,16 +15,17 @@ import org.beastiebots.utilities.Timestamped;
  *
  * @author Jacob
  */
-public class TeleopPerformance extends Timestamped{
+public class TeleopPerformance extends Timestamped {
+
     boolean doubleHang;
     boolean hang;
     boolean flag;
     int numCubes;
 
     public TeleopPerformance() {
-        super();
+        super(0);
     }
-    
+
     public TeleopPerformance(JsonObject obj) {
         super();
         this.readJson(obj);
@@ -36,8 +37,6 @@ public class TeleopPerformance extends Timestamped{
         this.flag = flag;
         this.numCubes = numCubes;
     }
-    
-    
 
     public boolean isDoubleHang() {
         return doubleHang;
@@ -78,18 +77,22 @@ public class TeleopPerformance extends Timestamped{
     public static TeleopPerformance createTeleopPerformance(TeleopPerformance teleop) {
         return new TeleopPerformance(teleop.isDoubleHang(), teleop.isHang(), teleop.isFlag(), teleop.getNumCubes());
     }
-    
+
     public JsonObject toJson() {
         JsonBuilderFactory factory = Json.createBuilderFactory(null);
-            JsonObject out = factory.createObjectBuilder()
-                    .add("doubleHang", doubleHang)
-                    .add("hang", hang)
-                    .add("flag", flag)
-                    .add("cubeCount", numCubes).build();
-            return out;
+        JsonObject out = factory.createObjectBuilder()
+                .add("modified", getDate().getTime())
+                .add("doubleHang", doubleHang)
+                .add("hang", hang)
+                .add("flag", flag)
+                .add("cubeCount", numCubes).build();
+        return out;
     }
 
     private void readJson(JsonObject obj) {
+        JsonNumber date = obj.getJsonNumber("modified");
+        setDate(date.longValue());
+
         doubleHang = obj.getBoolean("doubleHang");
         hang = obj.getBoolean("hang");
         flag = obj.getBoolean("flag");

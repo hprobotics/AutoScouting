@@ -6,12 +6,13 @@
 package org.beastiebots.scouting.tournament.uploader;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.Vector;
 import javax.swing.SwingWorker;
 import org.roblybarger.ServiceBrowser;
@@ -28,15 +29,29 @@ public class ScoutingClient extends SwingWorker<Boolean, Void> implements Servic
 
     ServiceBrowser browser;
     Vector<ServiceDescription> descriptors;
-    
-    String tournament;
 
-    public ScoutingClient(String tournament) {
+    private String tournament;
+    private Path outputDir;
+
+    public ScoutingClient(String tournament, Path outputDir) {
         this.tournament = tournament;
+        this.outputDir = outputDir;
     }
-    
+
     @Override
     public Boolean doInBackground() throws Exception {
+        if (outputDir != null) {
+            File outputFile = new File(outputDir.toFile(), "scouting" + File.separator + "3785" + File.separator + "data.json");
+
+            outputFile.getParentFile().mkdirs();
+
+            FileOutputStream fileOut = new FileOutputStream(outputFile);
+            PrintStream fileOutput = new PrintStream(fileOut);
+
+            fileOutput.print(tournament);
+            fileOutput.close();
+        }
+
         descriptors = new Vector<ServiceDescription>();
 
         /* first browse for any 'timeDemo' instance */
@@ -91,6 +106,7 @@ public class ScoutingClient extends SwingWorker<Boolean, Void> implements Servic
             System.out.println("\n---NO TIME SERVERS FOUND---");
             return false;
         }
+
     }
 
     @Override
@@ -101,5 +117,4 @@ public class ScoutingClient extends SwingWorker<Boolean, Void> implements Servic
         }
         descriptors.add(descriptor);
     }
-
 }

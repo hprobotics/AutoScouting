@@ -5,10 +5,25 @@
  */
 package org.beastiebots.scouting.gui;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.json.Json;
+import javax.swing.JFileChooser;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
+import net.samuelcampos.usbdrivedectector.USBDeviceDetectorManager;
+import net.samuelcampos.usbdrivedectector.events.DeviceEventType;
+import net.samuelcampos.usbdrivedectector.events.IUSBDriveListener;
+import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
 import org.beastiebots.scouting.tournament.MatchData;
 import org.beastiebots.scouting.tournament.Team;
 import org.beastiebots.scouting.tournament.TeleopPerformance;
@@ -22,6 +37,7 @@ import org.beastiebots.scouting.tournament.uploader.ScoutingServer;
 public class ScoutingServerUI extends javax.swing.JFrame {
 
     private Tournament tournament;
+    private File saveFile;
 
     /**
      * Creates new form ScoutingServerUI
@@ -61,6 +77,16 @@ public class ScoutingServerUI extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         spinnerTeleopCubes1 = new javax.swing.JSpinner();
         jLabel22 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        prePreScoutingTextArea = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        preScoutingTextArea = new javax.swing.JTextArea();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -150,36 +176,75 @@ public class ScoutingServerUI extends javax.swing.JFrame {
 
         jLabel22.setText("Endgame:");
 
+        jLabel1.setText("Comments:");
+
+        jTextArea1.setEditable(false);
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane3.setViewportView(jTextArea1);
+
+        prePreScoutingTextArea.setColumns(20);
+        prePreScoutingTextArea.setRows(5);
+        jScrollPane4.setViewportView(prePreScoutingTextArea);
+
+        jLabel2.setText("Pre-pre scouting:");
+
+        jLabel3.setText("Pre scouting:");
+
+        preScoutingTextArea.setColumns(20);
+        preScoutingTextArea.setRows(5);
+        jScrollPane5.setViewportView(preScoutingTextArea);
+
+        jButton1.setText("Commit pre data");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(fieldPanelRO1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel2)
+                        .addComponent(jScrollPane4)
+                        .addComponent(jLabel3)
+                        .addComponent(jScrollPane5))
+                    .addComponent(jButton1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(checkBoxHang1)
-                            .addComponent(jLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(fieldPanelRO1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(spinnerAutoCube1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel21)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(checkBoxHang1)
+                                    .addComponent(jLabel4))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(spinnerTeleopCubes1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(checkBoxDoubleHang1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(checkBoxFlag1))))
-                    .addComponent(jLabel22))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(spinnerAutoCube1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jLabel21)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(spinnerTeleopCubes1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(checkBoxDoubleHang1)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(checkBoxFlag1))))
+                            .addComponent(jLabel22))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,15 +259,32 @@ public class ScoutingServerUI extends javax.swing.JFrame {
                             .addComponent(jLabel4)
                             .addComponent(spinnerTeleopCubes1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel21))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel22)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel22))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(checkBoxHang1)
                             .addComponent(checkBoxDoubleHang1)
-                            .addComponent(checkBoxFlag1)))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(checkBoxFlag1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -210,7 +292,38 @@ public class ScoutingServerUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        JFileChooser chooseFile = new JFileChooser(saveFile);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "JSON File (.json)", "json");
+        chooseFile.setFileFilter(filter);
+        int returnVal = chooseFile.showDialog(this, "Open/Save");
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            saveFile = chooseFile.getSelectedFile();
+        }
+        if (saveFile != null && saveFile.exists()) {
+            try {
+                tournament.readJson(Json.createReader(new FileReader(saveFile)).readObject());
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         (new ScoutingServer(tournament, this)).execute();
+        USBDeviceDetectorManager deviceManager = new USBDeviceDetectorManager();
+        deviceManager.addDriveListener(new IUSBDriveListener() {
+
+            @Override
+            public void usbDriveEvent(USBStorageEvent event) {
+                if (event.getEventType().equals(DeviceEventType.CONNECTED) && new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json").exists()) {
+                    try {
+                        tournament.readJson(Json.createReader(new FileReader(new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json"))).readObject());
+                        updateUI();
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+        });
         String[] columnNames = {"Team Number"};
         DefaultTableModel model = new DefaultTableModel() {
 
@@ -225,7 +338,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
         jTable1.setRowSorter(new TableRowSorter(model));
         for (Team team : tournament.getTeams()) {
             Object[] o = new Object[1];
-            o[0] = Integer.toString(team.getNumber());
+            o[0] = String.format("%04d", team.getNumber());
             model.addRow(o);
         }
         jTable1.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -253,6 +366,14 @@ public class ScoutingServerUI extends javax.swing.JFrame {
                     }
                     jTable2.clearSelection();
                     fieldPanelRO1.reset();
+                    spinnerAutoCube1.setValue(0);
+                    checkBoxDoubleHang1.setSelected(false);
+                    checkBoxHang1.setSelected(false);
+                    checkBoxFlag1.setSelected(false);
+                    spinnerTeleopCubes1.setValue(0);
+                    jTextArea1.setText("");
+                    prePreScoutingTextArea.setText(tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getPreComments().getPrepreComments());
+                    preScoutingTextArea.setText(tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getPreComments().getPreComments());
                 }
             }
         });
@@ -276,18 +397,48 @@ public class ScoutingServerUI extends javax.swing.JFrame {
                 if (!lse.getValueIsAdjusting()) {
                     if (jTable2.getSelectedRow() > -1) {
                         fieldPanelRO1.setAutonomousRoutine(tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getMatchDataByNumber((String) jTable2.getModel().getValueAt(jTable2.getSelectedRow(), 0)).getAuto());
+                        spinnerAutoCube1.setValue(tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getMatchDataByNumber((String) jTable2.getModel().getValueAt(jTable2.getSelectedRow(), 0)).getAuto().getGoal());
                         TeleopPerformance teleop = tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getMatchDataByNumber((String) jTable2.getModel().getValueAt(jTable2.getSelectedRow(), 0)).getTeleop();
                         checkBoxDoubleHang1.setSelected(teleop.isDoubleHang());
                         checkBoxHang1.setSelected(teleop.isHang());
                         checkBoxFlag1.setSelected(teleop.isFlag());
                         spinnerTeleopCubes1.setValue(teleop.getNumCubes());
+                        jTextArea1.setText(tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getMatchDataByNumber((String) jTable2.getModel().getValueAt(jTable2.getSelectedRow(), 0)).getComments().getComments());
                     }
                 }
             }
         });
     }//GEN-LAST:event_formWindowOpened
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getPreComments().setPrepreComments(prePreScoutingTextArea.getText());
+        tournament.getTeamByNumber(Integer.parseInt((String) jTable1.getModel().getValueAt(jTable1.getSelectedRow(), 0))).getPreComments().setPreComments(preScoutingTextArea.getText());
+        System.out.println(tournament.toJson().toString());
+        saveFile.getParentFile().mkdirs();
+
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(saveFile);
+            PrintStream fileOutput = new PrintStream(fileOut);
+            fileOutput.print(tournament.toJson().toString());
+            fileOutput.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     public void updateUI() {
+        try {
+            FileOutputStream fileOut = new FileOutputStream(saveFile);
+            PrintStream fileOutput = new PrintStream(fileOut);
+
+            fileOutput.print(tournament.toJson().toString());
+            fileOutput.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         for (Team team : tournament.getTeams()) {
             boolean found = false;
             Object[] o = new Object[1];
@@ -348,8 +499,14 @@ public class ScoutingServerUI extends javax.swing.JFrame {
             }
             javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ScoutingServerUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -368,12 +525,16 @@ public class ScoutingServerUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkBoxFlag1;
     private javax.swing.JCheckBox checkBoxHang1;
     private org.beastiebots.scouting.autonomousPlotter.FieldPanelRO fieldPanelRO1;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -381,8 +542,14 @@ public class ScoutingServerUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea prePreScoutingTextArea;
+    private javax.swing.JTextArea preScoutingTextArea;
     private javax.swing.JSpinner spinnerAutoCube1;
     private javax.swing.JSpinner spinnerTeleopCubes1;
     // End of variables declaration//GEN-END:variables

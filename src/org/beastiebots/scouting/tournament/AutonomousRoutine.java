@@ -6,6 +6,7 @@
 package org.beastiebots.scouting.tournament;
 
 import java.awt.geom.Point2D;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,16 +29,9 @@ public class AutonomousRoutine extends Timestamped {
     private int goal;
 
     public AutonomousRoutine() {
-        super();
-        points = new ArrayList<>();
+        super(0);
+        points = new ArrayList<Point2D>();
         start = null;
-    }
-
-    public AutonomousRoutine(Point2D start, ArrayList<Point2D> points, int goal) {
-        super();
-        this.points = points;
-        this.start = start;
-        this.goal = goal;
     }
 
     public AutonomousRoutine(JsonObject obj) {
@@ -94,10 +88,12 @@ public class AutonomousRoutine extends Timestamped {
             JsonObject out = factory.createObjectBuilder()
                     .add("modified", getDate().getTime())
                     .add("start", factory.createObjectBuilder().add("x", start.getX()).add("y", start.getY()))
+                    .add("goal", goal)
                     .add("points", ptsArrBuild.build()).build();
             return out;
         } else {
             return factory.createObjectBuilder()
+                    .add("goal", goal)
                     .add("modified", getDate().getTime()).build();
         }
     }
@@ -105,6 +101,8 @@ public class AutonomousRoutine extends Timestamped {
     private void readJson(JsonObject obj) {
         JsonNumber date = obj.getJsonNumber("modified");
         setDate(date.longValue());
+
+        goal = obj.getInt("goal");
 
         JsonObject startPt = obj.getJsonObject("start");
         if (startPt != null) {

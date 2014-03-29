@@ -25,22 +25,29 @@ public class Team {
 
     private int number;
     private ArrayList<MatchData> data;
+    private PreComments preComments;
 
     public Team(int number) {
-        super();
+        this();
         this.number = number;
-        this.data = new ArrayList<>();
+        this.preComments = new PreComments();
     }
-    
+
     public Team() {
-        super();
-        this.data = new ArrayList<>();
+        this.data = new ArrayList<MatchData>();
     }
-    
-    public Team(JsonObject obj){
-        super();
-        this.data = new ArrayList<>();
+
+    public Team(JsonObject obj) {
+        this();
         this.readJson(obj);
+    }
+
+    public PreComments getPreComments() {
+        return preComments;
+    }
+
+    public void setPreComments(PreComments preComments) {
+        this.preComments = preComments;
     }
 
     public int getNumber() {
@@ -50,7 +57,7 @@ public class Team {
     public void addMatchData(MatchData data) {
         this.data.add(data);
     }
-    
+
     public List<MatchData> getMatchData() {
         return Collections.unmodifiableList(data);
     }
@@ -84,16 +91,28 @@ public class Team {
 
         JsonObject out = factory.createObjectBuilder()
                 .add("number", number)
+                .add("preComments",preComments.toJson())
                 .add("matches", matchArrBuild.build()).build();
         return out;
     }
 
     public void readJson(JsonObject obj) {
         number = obj.getJsonNumber("number").intValue();
-        
+
         JsonArray matches = obj.getJsonArray("matches");
         for (int i = 0; i < matches.size(); i++) {
-            data.add(new MatchData(matches.getJsonObject(i)));
+            if (getMatchDataByNumber(matches.getJsonObject(i).getString("number")) == null) {
+                data.add(new MatchData(matches.getJsonObject(i)));
+            } else {
+                getMatchDataByNumber(matches.getJsonObject(i).getString("number")).readJson(matches.getJsonObject(i));
+            }
+        }
+        
+        if (obj.containsKey("preComments")) {
+            PreComments preCommentsTmp = new PreComments(obj.getJsonObject("preComments"));
+            if (preComments == null || preCommentsTmp.getDate().after(preComments.getDate())) {
+                preComments = preCommentsTmp;
+            }
         }
     }
 }

@@ -5,6 +5,8 @@
  */
 package org.beastiebots.scouting.gui;
 
+import java.nio.file.Files;
+import net.samuelcampos.usbdrivedectector.USBStorageDevice;
 import org.beastiebots.scouting.tournament.MatchData;
 import org.beastiebots.scouting.tournament.Team;
 import org.beastiebots.scouting.tournament.TeleopPerformance;
@@ -15,14 +17,15 @@ import org.beastiebots.scouting.tournament.uploader.ScoutingClient;
  *
  * @author Jacob
  */
-public class ScoutingClientUI extends javax.swing.JFrame {
+public class ScoutingObjectiveClientUI extends javax.swing.JFrame {
 
     Tournament tournament;
+    USBStorageDevice flashDrive;
 
     /**
      * Creates new form ScoutingClientUI
      */
-    public ScoutingClientUI() {
+    public ScoutingObjectiveClientUI() {
         initComponents();
         tournament = new Tournament();
     }
@@ -88,6 +91,15 @@ public class ScoutingClientUI extends javax.swing.JFrame {
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, checkBoxHang1, org.jdesktop.beansbinding.ELProperty.create("${selected}"), teleopPerformance1, org.jdesktop.beansbinding.BeanProperty.create("hang"));
         bindingGroup.addBinding(binding);
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, spinnerTeleopCubes1, org.jdesktop.beansbinding.ELProperty.create("${value}"), teleopPerformance1, org.jdesktop.beansbinding.BeanProperty.create("numCubes"));
+        bindingGroup.addBinding(binding);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, checkBoxDoubleHang2, org.jdesktop.beansbinding.ELProperty.create("${selected}"), teleopPerformance2, org.jdesktop.beansbinding.BeanProperty.create("doubleHang"));
+        bindingGroup.addBinding(binding);
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, checkBoxFlag2, org.jdesktop.beansbinding.ELProperty.create("${selected}"), teleopPerformance2, org.jdesktop.beansbinding.BeanProperty.create("flag"));
+        bindingGroup.addBinding(binding);
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, checkBoxHang2, org.jdesktop.beansbinding.ELProperty.create("${selected}"), teleopPerformance2, org.jdesktop.beansbinding.BeanProperty.create("hang"));
+        bindingGroup.addBinding(binding);
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, spinnerTeleopCubes2, org.jdesktop.beansbinding.ELProperty.create("${value}"), teleopPerformance2, org.jdesktop.beansbinding.BeanProperty.create("numCubes"));
         bindingGroup.addBinding(binding);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -201,6 +213,11 @@ public class ScoutingClientUI extends javax.swing.JFrame {
         checkBoxFlag1.setText("Flag");
 
         spinnerAutoCube1.setModel(new javax.swing.SpinnerNumberModel(0, 0, 4, 1));
+        spinnerAutoCube1.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spinnerAutoCube1StateChanged(evt);
+            }
+        });
 
         spinnerTeleopCubes1.setModel(new javax.swing.SpinnerNumberModel(0, 0, 99, 1));
 
@@ -215,6 +232,11 @@ public class ScoutingClientUI extends javax.swing.JFrame {
         checkBoxHang2.setText("Hang");
 
         spinnerAutoCube2.setModel(new javax.swing.SpinnerNumberModel(0, 0, 4, 1));
+        spinnerAutoCube2.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spinnerAutoCube2StateChanged(evt);
+            }
+        });
 
         checkBoxFlag2.setText("Flag");
 
@@ -310,16 +332,17 @@ public class ScoutingClientUI extends javax.swing.JFrame {
                     .addComponent(fieldPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(fieldPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(spinnerAutoCube1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel23)
-                    .addComponent(spinnerAutoCube2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel21)
-                    .addComponent(spinnerTeleopCubes1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(spinnerTeleopCubes2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel24)))
+                        .addComponent(jLabel24))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel4)
+                        .addComponent(spinnerAutoCube1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel23)
+                        .addComponent(spinnerAutoCube2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel21)
+                        .addComponent(spinnerTeleopCubes1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel22)
@@ -345,6 +368,12 @@ public class ScoutingClientUI extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
+        FlashDriveChooser selector = new FlashDriveChooser(this, true, flashDrive);
+        selector.setVisible(true);
+        if (flashDrive == null || Files.notExists(flashDrive.getRootDirectory().toPath())) {
+            flashDrive = null;
+        }
+        flashDrive = selector.getChosenDevice();
         if (!teamNumber1.getText().isEmpty()) {
             Team team1 = tournament.getOrCreateTeamByNumber(Integer.parseInt(teamNumber1.getText()));
             team1.addMatchData(new MatchData(jTextField1.getText(), fieldPanel1.getAutonomousRoutine(), TeleopPerformance.createTeleopPerformance(teleopPerformance1)));
@@ -370,7 +399,7 @@ public class ScoutingClientUI extends javax.swing.JFrame {
             jTextField1.setText("");
         }
         System.out.println(tournament.toJson().toString());
-        (new ScoutingClient(tournament.toJson().toString())).execute();
+        (new ScoutingClient(tournament.toJson().toString(),(flashDrive != null)?flashDrive.getRootDirectory().toPath():null)).execute();
     }//GEN-LAST:event_commitButtonActionPerformed
 
     private void teamNumber1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_teamNumber1FocusGained
@@ -380,6 +409,14 @@ public class ScoutingClientUI extends javax.swing.JFrame {
     private void teamNumber2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_teamNumber2FocusGained
         teamNumber2.setSelectionStart(0);
     }//GEN-LAST:event_teamNumber2FocusGained
+
+    private void spinnerAutoCube1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerAutoCube1StateChanged
+        fieldPanel1.getAutonomousRoutine().setGoal((Integer)spinnerAutoCube1.getValue());
+    }//GEN-LAST:event_spinnerAutoCube1StateChanged
+
+    private void spinnerAutoCube2StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerAutoCube2StateChanged
+        fieldPanel2.getAutonomousRoutine().setGoal((Integer)spinnerAutoCube2.getValue());
+    }//GEN-LAST:event_spinnerAutoCube2StateChanged
 
     /**
      * @param args the command line arguments
@@ -400,20 +437,20 @@ public class ScoutingClientUI extends javax.swing.JFrame {
             javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ScoutingClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ScoutingObjectiveClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ScoutingClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ScoutingObjectiveClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ScoutingClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ScoutingObjectiveClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ScoutingClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ScoutingObjectiveClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ScoutingClientUI().setVisible(true);
+                new ScoutingObjectiveClientUI().setVisible(true);
             }
         });
     }

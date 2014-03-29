@@ -6,6 +6,9 @@
 package org.beastiebots.scouting.tournament.uploader;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -16,9 +19,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonReader;
 import javax.swing.SwingWorker;
+import net.samuelcampos.usbdrivedectector.USBDeviceDetectorManager;
+import net.samuelcampos.usbdrivedectector.events.DeviceEventType;
+import net.samuelcampos.usbdrivedectector.events.IUSBDriveListener;
+import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
 import org.beastiebots.scouting.gui.ScoutingServerUI;
 import org.beastiebots.scouting.tournament.Tournament;
 import org.roblybarger.ServiceDescription;
@@ -36,7 +45,7 @@ public class ScoutingServer extends SwingWorker<Void, String> {
     public ScoutingServer(Tournament theTournament, ScoutingServerUI ui) {
         this.theTournament = theTournament;
         this.ui = ui;
-    }    
+    }
 
     @Override
     public Void doInBackground() throws Exception {
@@ -106,7 +115,8 @@ public class ScoutingServer extends SwingWorker<Void, String> {
         JsonReader reader = Json.createReader(new StringReader(tournamentStr));
 
         theTournament.readJson(reader.readObject());
-        
+
         ui.updateUI();
     }
+
 }

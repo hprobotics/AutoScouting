@@ -68,7 +68,7 @@ public class FieldPanelData {
     }
 
     public List<Point2D> getPoints() {
-        List<Point2D> ret = new ArrayList<>(auto.getPoints());
+        List<Point2D> ret = new ArrayList<Point2D>(auto.getPoints());
         if (lastPoint != null) {
             ret.add(lastPoint);
         }

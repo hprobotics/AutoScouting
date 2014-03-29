@@ -26,12 +26,11 @@ public class Tournament {
 
     public Tournament() {
         super();
-        teams = new ArrayList<>();
+        teams = new ArrayList<Team>();
     }
     
     public Tournament(JsonObject obj) {
-        super();
-        teams = new ArrayList<>();
+        this();
         this.readJson(obj);
     }
     

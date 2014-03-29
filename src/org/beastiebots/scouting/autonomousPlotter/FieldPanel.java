@@ -16,7 +16,6 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.List;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
