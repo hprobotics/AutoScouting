@@ -104,7 +104,7 @@ public class MatchData {
         }
         if (obj.containsKey("comments")) {
             SubjectiveComments commentsTmp = new SubjectiveComments(obj.getJsonObject("comments"));
-            if (comments == null || commentsTmp.getDate().after(comments.getDate())) {
+            if (comments == null || comments.getComments().contains(commentsTmp.getComments())) {
                 comments.readJson(obj.getJsonObject("comments"));
             }
         }
