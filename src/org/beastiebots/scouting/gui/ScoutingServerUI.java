@@ -9,11 +9,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import javax.json.Json;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -56,6 +60,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jDialog1 = new javax.swing.JDialog();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -87,6 +92,17 @@ public class ScoutingServerUI extends javax.swing.JFrame {
         jScrollPane5 = new javax.swing.JScrollPane();
         preScoutingTextArea = new javax.swing.JTextArea();
         jButton1 = new javax.swing.JButton();
+
+        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
+        jDialog1.getContentPane().setLayout(jDialog1Layout);
+        jDialog1Layout.setHorizontalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jDialog1Layout.setVerticalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -308,15 +324,31 @@ public class ScoutingServerUI extends javax.swing.JFrame {
             }
         }
         (new ScoutingServer(tournament, this)).execute();
-        USBDeviceDetectorManager deviceManager = new USBDeviceDetectorManager();
+        USBDeviceDetectorManager deviceManager = new USBDeviceDetectorManager(1000);
         deviceManager.addDriveListener(new IUSBDriveListener() {
 
             @Override
             public void usbDriveEvent(USBStorageEvent event) {
                 if (event.getEventType().equals(DeviceEventType.CONNECTED) && new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json").exists()) {
                     try {
-                        tournament.readJson(Json.createReader(new FileReader(new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json"))).readObject());
-                        updateUI();
+                        boolean updated = tournament.readJson(Json.createReader(new FileReader(new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json"))).readObject());
+                        System.out.println("updated:"+updated);
+                        updateUI(updated, event.getStorageDevice().getSystemDisplayName());
+                        if (updated) {
+                            try {
+                                Socket socket = new Socket("beastiebots.org", 8081);
+
+                                GZIPOutputStream gzipOut = new GZIPOutputStream(socket.getOutputStream());
+                                PrintStream output
+                                        = new PrintStream(gzipOut);
+                                output.println(tournament.toJson().toString());
+                                output.flush();
+                                gzipOut.finish();
+                                socket.close();
+                            } catch (IOException ie) {
+                                System.err.println("Exception: " + ie);
+                            }
+                        }
                     } catch (FileNotFoundException ex) {
                         Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -426,9 +458,27 @@ public class ScoutingServerUI extends javax.swing.JFrame {
             Logger.getLogger(ScoutingServerUI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        try {
+            Socket socket = new Socket("beastiebots.org", 1);
+
+            GZIPOutputStream gzipOut = new GZIPOutputStream(socket.getOutputStream());
+            PrintStream output
+                    = new PrintStream(gzipOut);
+            output.println(tournament.toJson().toString());
+            output.flush();
+            gzipOut.finish();
+            socket.close();
+        } catch (IOException ie) {
+            System.err.println("Exception: " + ie);
+        }
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public void updateUI() {
+        updateUI(false, null);
+    }
+
+    public void updateUI(boolean notify, String src) {
         try {
             FileOutputStream fileOut = new FileOutputStream(saveFile);
             PrintStream fileOutput = new PrintStream(fileOut);
@@ -479,6 +529,9 @@ public class ScoutingServerUI extends javax.swing.JFrame {
                 }
             }
         }
+        if (notify) {
+            JOptionPane.showMessageDialog(this, "Loaded data from "+src, src, JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     /**
@@ -526,6 +579,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkBoxHang1;
     private org.beastiebots.scouting.autonomousPlotter.FieldPanelRO fieldPanelRO1;
     private javax.swing.JButton jButton1;
+    private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;

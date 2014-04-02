@@ -28,20 +28,19 @@ public class Tournament {
         super();
         teams = new ArrayList<Team>();
     }
-    
+
     public Tournament(JsonObject obj) {
         this();
         this.readJson(obj);
     }
-    
+
     public List<Team> getTeams() {
         return Collections.unmodifiableList(teams);
     }
-    
+
     public Team getOrCreateTeamByNumber(int number) {
         Team ret = getTeamByNumber(number);
-        if(ret == null)
-        {
+        if (ret == null) {
             return addTeamByNumber(number);
         }
         return ret;
@@ -65,7 +64,7 @@ public class Tournament {
     public void removeTeamByNumber(int number) {
         teams.add(new Team(number));
     }
-    
+
     public JsonObject toJson() {
         JsonBuilderFactory factory = Json.createBuilderFactory(null);
         JsonArrayBuilder teamArrBuild = factory.createArrayBuilder();
@@ -80,10 +79,19 @@ public class Tournament {
         return out;
     }
 
-    public void readJson(JsonObject obj) {
+    public boolean readJson(JsonObject obj) {
         JsonArray teamIn = obj.getJsonArray("teams");
+        boolean changed = false;
         for (int i = 0; i < teamIn.size(); i++) {
-            this.getOrCreateTeamByNumber(teamIn.getJsonObject(i).getJsonNumber("number").intValue()).readJson(teamIn.getJsonObject(i));
+            if (this.getTeamByNumber(teamIn.getJsonObject(i).getJsonNumber("number").intValue()) == null) {
+                this.addTeamByNumber(teamIn.getJsonObject(i).getJsonNumber("number").intValue()).readJson(teamIn.getJsonObject(i));
+                changed = true;
+            } else {
+                boolean ret = this.getTeamByNumber(teamIn.getJsonObject(i).getJsonNumber("number").intValue()).readJson(teamIn.getJsonObject(i));
+                changed = changed || ret;
+            }
         }
+
+        return changed;
     }
 }

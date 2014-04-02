@@ -91,28 +91,36 @@ public class Team {
 
         JsonObject out = factory.createObjectBuilder()
                 .add("number", number)
-                .add("preComments",preComments.toJson())
+                .add("preComments", preComments.toJson())
                 .add("matches", matchArrBuild.build()).build();
         return out;
     }
 
-    public void readJson(JsonObject obj) {
-        number = obj.getJsonNumber("number").intValue();
+    public boolean readJson(JsonObject obj) {
+        boolean changed = false;
+        if (number != obj.getJsonNumber("number").intValue()) {
+            number = obj.getJsonNumber("number").intValue();
+            changed = true;
+        }
 
         JsonArray matches = obj.getJsonArray("matches");
         for (int i = 0; i < matches.size(); i++) {
             if (getMatchDataByNumber(matches.getJsonObject(i).getString("number")) == null) {
                 data.add(new MatchData(matches.getJsonObject(i)));
+                changed = true;
             } else {
-                getMatchDataByNumber(matches.getJsonObject(i).getString("number")).readJson(matches.getJsonObject(i));
+                boolean ret = getMatchDataByNumber(matches.getJsonObject(i).getString("number")).readJson(matches.getJsonObject(i));
+                changed = changed || ret;
             }
         }
-        
+
         if (obj.containsKey("preComments")) {
             PreComments preCommentsTmp = new PreComments(obj.getJsonObject("preComments"));
             if (preComments == null || preCommentsTmp.getDate().after(preComments.getDate())) {
                 preComments = preCommentsTmp;
+                changed = true;
             }
         }
+        return changed;
     }
 }

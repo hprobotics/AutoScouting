@@ -42,6 +42,7 @@ public class MatchData {
         comments = new SubjectiveComments();
         auto = new AutonomousRoutine();
         teleop = new TeleopPerformance();
+        matchNumber = "";
     }
     
     
@@ -88,25 +89,34 @@ public class MatchData {
         return out;
     }
 
-    public void readJson(JsonObject obj) {
-        matchNumber = obj.getJsonString("number").getString();
+    public boolean readJson(JsonObject obj) {
+        boolean changed = false;
+        if (!obj.getString("number").equals(matchNumber)) {
+            matchNumber = obj.getString("number");
+            changed = true;
+        }
+        
         if (obj.containsKey("autonomous")) {
             AutonomousRoutine autoTmp = new AutonomousRoutine(obj.getJsonObject("autonomous"));
             if (auto == null || autoTmp.getDate().after(auto.getDate())) {
                 auto = autoTmp;
+                changed = true;
             }
         }
         if (obj.containsKey("teleop")) {
             TeleopPerformance teleopTmp = new TeleopPerformance(obj.getJsonObject("teleop"));
             if (teleop == null || teleopTmp.getDate().after(teleop.getDate())) {
                 teleop = teleopTmp;
+                changed = true;
             }
         }
         if (obj.containsKey("comments")) {
             SubjectiveComments commentsTmp = new SubjectiveComments(obj.getJsonObject("comments"));
-            if (comments == null || comments.getComments().contains(commentsTmp.getComments())) {
+            if (comments == null || !comments.getComments().contains(commentsTmp.getComments())) {
                 comments.readJson(obj.getJsonObject("comments"));
+                changed = true;
             }
         }
+        return changed;
     }
 }

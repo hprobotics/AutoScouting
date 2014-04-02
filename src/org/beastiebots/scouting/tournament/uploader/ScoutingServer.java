@@ -6,12 +6,10 @@
 package org.beastiebots.scouting.tournament.uploader;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -19,15 +17,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import javax.json.Json;
 import javax.json.JsonReader;
 import javax.swing.SwingWorker;
-import net.samuelcampos.usbdrivedectector.USBDeviceDetectorManager;
-import net.samuelcampos.usbdrivedectector.events.DeviceEventType;
-import net.samuelcampos.usbdrivedectector.events.IUSBDriveListener;
-import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
 import org.beastiebots.scouting.gui.ScoutingServerUI;
 import org.beastiebots.scouting.tournament.Tournament;
 import org.roblybarger.ServiceDescription;
@@ -109,13 +102,28 @@ public class ScoutingServer extends SwingWorker<Void, String> {
         }
     }
 
+    @Override
     protected void process(List<String> tournaments) {
         String tournamentStr = tournaments.get(tournaments.size() - 1);
 
         JsonReader reader = Json.createReader(new StringReader(tournamentStr));
 
-        theTournament.readJson(reader.readObject());
+        boolean changed = theTournament.readJson(reader.readObject());
+        if (changed) {
+            try {
+                Socket socket = new Socket("beastiebots.org", 8081);
 
+                GZIPOutputStream gzipOut = new GZIPOutputStream(socket.getOutputStream());
+                PrintStream output
+                        = new PrintStream(gzipOut);
+                output.println(theTournament.toJson().toString());
+                output.flush();
+                gzipOut.finish();
+                socket.close();
+            } catch (IOException ie) {
+                System.err.println("Exception: " + ie);
+            }
+        }
         ui.updateUI();
     }
 
