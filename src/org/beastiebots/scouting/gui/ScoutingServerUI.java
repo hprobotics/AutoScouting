@@ -332,7 +332,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
                 if (event.getEventType().equals(DeviceEventType.CONNECTED) && new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json").exists()) {
                     try {
                         boolean updated = tournament.readJson(Json.createReader(new FileReader(new File(event.getStorageDevice().getRootDirectory(), "scouting" + File.separator + "3785" + File.separator + "data.json"))).readObject());
-                        System.out.println("updated:"+updated);
+                        System.out.println("updated:" + updated);
                         updateUI(updated, event.getStorageDevice().getSystemDisplayName());
                         if (updated) {
                             try {
@@ -459,7 +459,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
         }
 
         try {
-            Socket socket = new Socket("beastiebots.org", 1);
+            Socket socket = new Socket("beastiebots.org", 8081);
 
             GZIPOutputStream gzipOut = new GZIPOutputStream(socket.getOutputStream());
             PrintStream output
@@ -480,6 +480,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
 
     public void updateUI(boolean notify, String src) {
         try {
+            saveFile.getParentFile().mkdirs();
             FileOutputStream fileOut = new FileOutputStream(saveFile);
             PrintStream fileOutput = new PrintStream(fileOut);
 
@@ -530,7 +531,7 @@ public class ScoutingServerUI extends javax.swing.JFrame {
             }
         }
         if (notify) {
-            JOptionPane.showMessageDialog(this, "Loaded data from "+src, src, JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Loaded data from " + src, src, JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
